@@ -1,5 +1,3 @@
-// temporary for u32, later i will replace to generic
-
 #![allow(unused_must_use)]
 #![allow(dead_code)]
 use std::fmt::{Debug, Display, Formatter};
@@ -7,14 +5,16 @@ use core::ptr::NonNull;
 use crate::errors::Errors;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq, Default)]
-pub struct Node {
-    pub data: u32,
-    pub next: Option<NonNull<Node>>,
-    pub prev: Option<NonNull<Node>>,
+pub struct Node<T>
+where T: Display + Copy {
+    pub data: T,
+    pub next: Option<NonNull<Node<T>>>,
+    pub prev: Option<NonNull<Node<T>>>,
 }
 
-impl Node {
-    pub fn new(data: u32) -> Node {
+impl<T> Node<T>
+where T: Display + Copy {
+    pub fn new(data: T) -> Node<T> {
         Node {
             data,
             prev: None,
@@ -25,14 +25,16 @@ impl Node {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct BidirList {
-    pub head: Option<NonNull<Node>>,
-    pub tail: Option<NonNull<Node>>,
+pub struct BidirList<T>
+where T: Display + Copy {
+    pub head: Option<NonNull<Node<T>>>,
+    pub tail: Option<NonNull<Node<T>>>,
     pub len: u8,
 }
 
-impl BidirList {
-    pub fn new() -> BidirList {
+impl<T> BidirList<T>
+where T: Display + Copy {
+    pub fn new() -> BidirList<T> {
         BidirList {
             head: None,
             tail: None,
@@ -40,8 +42,8 @@ impl BidirList {
         }
     }
 
-    pub fn push_front(&mut self, new: u32) {
-        let new_node:Box<Node> = Box::new(Node::new(new));
+    pub fn push_front(&mut self, new: T) {
+        let new_node:Box<Node<T>> = Box::new(Node::new(new));
         match self.empty() {
             true => {
                 self.add_first(new_node);
@@ -54,7 +56,7 @@ impl BidirList {
         self.len = self.len + 1;
     }
 
-    pub fn pop_front(&mut self) -> Result<u32, Errors> {
+    pub fn pop_front(&mut self) -> Result<T, Errors> {
         if self.empty() {
             return Err(Errors::EmptyListError);
         }
@@ -73,7 +75,7 @@ impl BidirList {
             Some(result) => Ok(result),
         }
     }
-    pub fn pop_back(&mut self) -> Result<u32, Errors> {
+    pub fn pop_back(&mut self) -> Result<T, Errors> {
         if self.empty() {
             return Err(Errors::EmptyListError);
         }
@@ -93,8 +95,8 @@ impl BidirList {
         }
     }
 
-    pub fn push_back(&mut self, new: u32) {
-        let new_node:Box<Node> = Box::new(Node::new(new));
+    pub fn push_back(&mut self, new: T) {
+        let new_node:Box<Node<T>> = Box::new(Node::new(new));
         match self.empty() {
             true => {
                 self.add_first(new_node);
@@ -137,8 +139,9 @@ impl BidirList {
     }
 }
 
-impl BidirList {
-    fn push_front_node(&mut self, mut node: Box<Node>) {
+impl<T> BidirList<T>
+where T: Display + Copy {
+    fn push_front_node(&mut self, mut node: Box<Node<T>>) {
         node.next = self.head;
         let node = Some(Box::leak(node).into());
         unsafe {
@@ -147,7 +150,7 @@ impl BidirList {
         self.head = node;
     }
 
-    fn push_back_node(&mut self, mut node: Box<Node>) {
+    fn push_back_node(&mut self, mut node: Box<Node<T>>) {
         node.prev = self.tail;
         let node = Some(Box::leak(node).into());
         unsafe {
@@ -156,7 +159,7 @@ impl BidirList {
         self.tail = node;
     }
 
-    fn add_first(&mut self, node: Box<Node>) {
+    fn add_first(&mut self, node: Box<Node<T>>) {
         let node = Some(Box::leak(node).into());
         self.head = node;
         self.tail = node;
@@ -175,7 +178,8 @@ impl BidirList {
     }
 }
 
-impl Display for BidirList {
+impl<T> Display for BidirList<T>
+where T: Display + Copy {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut node = self.head;
         write!(f, "[head|front]");
@@ -190,19 +194,22 @@ impl Display for BidirList {
     }
 }
 
-impl Display for Node {
+impl<T> Display for Node<T>
+where T: Display + Copy {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{}]", self.data)
     }
 }
 
-impl Drop for Node {
+impl<T> Drop for Node<T>
+where T: Display + Copy {
     fn drop(&mut self) {
         // println!("Dropped node {}", self);
     }
 }
 
-impl Drop for BidirList {
+impl<T> Drop for BidirList<T>
+where T: Display + Copy {
     fn drop(&mut self) {
         // println!("Dropped List: {}", self);
         while !self.empty() {

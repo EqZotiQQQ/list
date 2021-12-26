@@ -9,7 +9,7 @@ mod tests {
         let head = None;
         let tail = None;
 
-        let list = BidirList::new();
+        let list:BidirList<u32> = BidirList::new();
 
         assert_eq!(list.empty(), true);
         assert_eq!(list.head, head);
@@ -21,7 +21,7 @@ mod tests {
         let head = Some(Box::new(Node::new(42)));
         let tail = Some(Box::new(Node::new(42)));
 
-        let mut list = BidirList::new();
+        let mut list:BidirList<u32> = BidirList::new();
         list.push_front(42);
 
         unsafe {
@@ -36,7 +36,7 @@ mod tests {
         let tail = Some(Rc::new(Node::new(42)));
         let head = Some(Rc::new(Node::new(24)));
 
-        let mut list = BidirList::new();
+        let mut list:BidirList<u32> = BidirList::new();
         list.push_front(42);
         list.push_front(24);
 
@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn pop_front_from_empty_list() {
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         match list.pop_front() {
             Ok(_) => {panic!("Unexpected success!");}
             Err(_) => {}
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn pop_front_from_non_empty_list() {
         let expected = vec![50,40,30,20,10];
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         list.push_front(10);
         list.push_front(20);
         list.push_front(30);
@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn push_front_and_pop_back() {
         let expected = vec![50,40,30,20,10];
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         list.push_front(10);
         list.push_front(20);
         list.push_front(30);
@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn push_and_pop_back() {
         let expected = vec![10, 20, 30, 40, 50];
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         list.push_back(10);
         list.push_back(20);
         list.push_back(30);
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn pop_back_from_empty_list() {
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         match list.pop_back() {
             Ok(_) => {panic!("Unexpected success!");}
             Err(_) => {}
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_display() { // Don't forget for "cargo test -- --nocapture"
-        let mut list = BidirList::new();
+        let mut list: BidirList<u32> = BidirList::new();
         list.push_front(10);
         list.push_front(20);
         list.push_front(30);
