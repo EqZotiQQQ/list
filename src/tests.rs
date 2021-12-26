@@ -2,7 +2,6 @@
 mod tests {
     use std::rc::Rc;
     use crate::bidirectional_list::{BidirList, Node};
-    use crate::errors::Errors;
 
     #[test]
     fn create_empty_list() {
@@ -57,6 +56,7 @@ mod tests {
     }
 
     #[test]
+    #[warn(irrefutable_let_patterns)]
     fn pop_front_from_non_empty_list() {
         let expected = vec![50,40,30,20,10];
         let mut list = BidirList::new();
@@ -74,6 +74,57 @@ mod tests {
                 }
             }
             i = i + 1;
+        }
+    }
+
+    #[test]
+    fn push_front_and_pop_back() {
+        let expected = vec![50,40,30,20,10];
+        let mut list = BidirList::new();
+        list.push_front(10);
+        list.push_front(20);
+        list.push_front(30);
+        list.push_front(40);
+        list.push_front(50);
+
+        while !list.empty() {
+            if let item = list.pop_back() {
+                if let Ok(item_res) = item {
+                    assert_eq!(expected[(list.len) as usize], item_res);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn push_and_pop_back() {
+        let expected = vec![10, 20, 30, 40, 50];
+        let mut list = BidirList::new();
+        list.push_back(10);
+        list.push_back(20);
+        list.push_back(30);
+        list.push_back(40);
+        list.push_back(50);
+
+        // println!("reverse list: {}", list);
+        // println!("list: {}", list);
+        // list.reverse_iter();
+        // list.iter();
+        while !list.empty() {
+            if let item = list.pop_back() {
+                if let Ok(item_res) = item {
+                    assert_eq!(expected[(list.len) as usize], item_res);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn pop_back_from_empty_list() {
+        let mut list = BidirList::new();
+        match list.pop_back() {
+            Ok(_) => {panic!("Unexpected success!");}
+            Err(_) => {}
         }
     }
 

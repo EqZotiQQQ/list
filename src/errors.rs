@@ -1,3 +1,4 @@
 pub enum Errors {
-    NoElementInListError,
+    EmptyListError,
+    UnexpectedError,
 }

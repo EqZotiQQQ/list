@@ -53,7 +53,7 @@ impl BidirList {
 
     pub fn pop_front(&mut self) -> Result<u32, Errors> {
         if self.empty() {
-            return Err(Errors::NoElementInListError);
+            return Err(Errors::EmptyListError);
         }
 
         match self.head.map(|old_head| unsafe {
@@ -66,9 +66,68 @@ impl BidirList {
             self.len = self.len - 1;
             node.data
         }) {
-            None => return Err(Errors::NoElementInListError),
+            None => return Err(Errors::UnexpectedError),
             Some(result) => Ok(result),
         }
+    }
+    pub fn pop_back(&mut self) -> Result<u32, Errors> {
+        if self.empty() {
+            return Err(Errors::EmptyListError);
+        }
+
+        match self.tail.map(|old_tail| unsafe {
+            let node = Box::from_raw(old_tail.as_ptr());
+            self.tail = node.prev;
+            match self.tail {
+                Some(tail) => (*tail.as_ptr()).next = None,
+                None => self.tail = None,
+            }
+            self.len = self.len - 1;
+            node.data
+        }) {
+            None => return Err(Errors::UnexpectedError),
+            Some(result) => Ok(result),
+        }
+    }
+
+    pub fn push_back(&mut self, new: u32) {
+        let new_node:Box<Node> = Box::new(Node::new(new));
+        match self.empty() {
+            true => {
+                self.add_first(new_node);
+            }
+            false => {
+                self.push_back_node(new_node);
+            }
+        }
+        self.len = self.len + 1;
+    }
+
+    pub fn iter(&self) {
+        let mut node = self.head;
+        let mut f: Formatter;
+        print!("List: [head|front]");
+        while let Some(s) = node {
+            print!("<=>");
+            unsafe {
+                print!("{}", s.as_ref());
+                node = node.unwrap().as_ref().next;
+            }
+        }
+        println!("<=>[tail|back]");
+    }
+
+    pub fn reverse_iter(&self) {
+        let mut node = self.tail;
+        print!("Reversed list: [tail|back]");
+        while let Some(s) = node {
+            print!("<=>");
+            unsafe {
+                print!("{}", s.as_ref());
+                node = node.unwrap().as_ref().prev;
+            }
+        }
+        println!("<=>[head|front]");
     }
 
     pub fn empty(&self) -> bool {
@@ -78,14 +137,21 @@ impl BidirList {
 
 impl BidirList {
     fn push_front_node(&mut self, mut node: Box<Node>) {
+        node.next = self.head;
+        let node = Some(Box::leak(node).into());
         unsafe {
-            node.next = self.head;
-            let node = Some(Box::leak(node).into());
-            unsafe {
-                (*self.head.unwrap().as_ptr()).prev = node;
-            }
-            self.head = node;
+            (*self.head.unwrap().as_ptr()).prev = node;
         }
+        self.head = node;
+    }
+
+    fn push_back_node(&mut self, mut node: Box<Node>) {
+        node.prev = self.tail;
+        let node = Some(Box::leak(node).into());
+        unsafe {
+            (*self.tail.unwrap().as_ptr()).next = node;
+        }
+        self.tail = node;
     }
 
     fn add_first(&mut self, mut node: Box<Node>) {
@@ -130,13 +196,13 @@ impl Display for Node {
 
 impl Drop for Node {
     fn drop(&mut self) {
-        println!("Dropped node {}", self);
+        // println!("Dropped node {}", self);
     }
 }
 
 impl Drop for BidirList {
     fn drop(&mut self) {
-        println!("Dropped List: {}", self);
+        // println!("Dropped List: {}", self);
         while !self.empty() {
             self.drop_front();
         }
