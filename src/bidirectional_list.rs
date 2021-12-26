@@ -67,7 +67,7 @@ impl BidirList {
             node.data
         }) {
             None => return Err(Errors::NoElementInListError),
-            Some(s) => Ok(s),
+            Some(result) => Ok(result),
         }
     }
 
