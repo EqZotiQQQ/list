@@ -2,7 +2,8 @@
 mod tests {
     #![allow(irrefutable_let_patterns)]
     use std::rc::Rc;
-    use crate::bidirectional_list::{BidirList, Node};
+    use crate::bidirectional_list::BidirList;
+    use crate::node::Node;
 
     #[test]
     fn create_empty_list() {

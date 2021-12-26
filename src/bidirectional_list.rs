@@ -3,27 +3,9 @@
 use std::fmt::{Debug, Display, Formatter};
 use core::ptr::NonNull;
 use crate::errors::Errors;
+use crate::node::Node;
 
-#[derive(Debug, Clone, PartialOrd, PartialEq, Default)]
-pub struct Node<T>
-where T: Display + Copy {
-    pub data: T,
-    pub next: Option<NonNull<Node<T>>>,
-    pub prev: Option<NonNull<Node<T>>>,
-}
 
-impl<T> Node<T>
-where T: Display + Copy {
-    pub fn new(data: T) -> Node<T> {
-        Node {
-            data,
-            prev: None,
-            next: None,
-        }
-    }
-}
-
-#[allow(dead_code)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct BidirList<T>
 where T: Display + Copy {
@@ -191,20 +173,6 @@ where T: Display + Copy {
             }
         }
         write!(f, "<=>[tail|back]")
-    }
-}
-
-impl<T> Display for Node<T>
-where T: Display + Copy {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}]", self.data)
-    }
-}
-
-impl<T> Drop for Node<T>
-where T: Display + Copy {
-    fn drop(&mut self) {
-        // println!("Dropped node {}", self);
     }
 }
 
