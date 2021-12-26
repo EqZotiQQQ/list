@@ -1,5 +1,7 @@
 // temporary for u32, later i will replace to generic
 
+#![allow(unused_must_use)]
+#![allow(dead_code)]
 use std::fmt::{Debug, Display, Formatter};
 use core::ptr::NonNull;
 use crate::errors::Errors;
@@ -21,6 +23,7 @@ impl Node {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct BidirList {
     pub head: Option<NonNull<Node>>,
@@ -103,9 +106,8 @@ impl BidirList {
         self.len = self.len + 1;
     }
 
-    pub fn iter(&self) {
+    pub fn display(&self) {
         let mut node = self.head;
-        let mut f: Formatter;
         print!("List: [head|front]");
         while let Some(s) = node {
             print!("<=>");
@@ -117,7 +119,7 @@ impl BidirList {
         println!("<=>[tail|back]");
     }
 
-    pub fn reverse_iter(&self) {
+    pub fn display_reversed(&self) {
         let mut node = self.tail;
         print!("Reversed list: [tail|back]");
         while let Some(s) = node {
@@ -154,7 +156,7 @@ impl BidirList {
         self.tail = node;
     }
 
-    fn add_first(&mut self, mut node: Box<Node>) {
+    fn add_first(&mut self, node: Box<Node>) {
         let node = Some(Box::leak(node).into());
         self.head = node;
         self.tail = node;

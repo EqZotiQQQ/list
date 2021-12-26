@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    #![allow(irrefutable_let_patterns)]
     use std::rc::Rc;
     use crate::bidirectional_list::{BidirList, Node};
 
@@ -56,7 +57,6 @@ mod tests {
     }
 
     #[test]
-    #[warn(irrefutable_let_patterns)]
     fn pop_front_from_non_empty_list() {
         let expected = vec![50,40,30,20,10];
         let mut list = BidirList::new();
@@ -106,10 +106,6 @@ mod tests {
         list.push_back(40);
         list.push_back(50);
 
-        // println!("reverse list: {}", list);
-        // println!("list: {}", list);
-        // list.reverse_iter();
-        // list.iter();
         while !list.empty() {
             if let item = list.pop_back() {
                 if let Ok(item_res) = item {
@@ -137,6 +133,8 @@ mod tests {
         list.push_front(40);
         list.push_front(50);
 
-        println!("{}", list);
+        println!("\n{}", list);
+        list.display_reversed();
+        list.display();
     }
 }
