@@ -1,9 +1,7 @@
 // temporary for u32, later i will replace to generic
 
-use std::fmt::{Display, Formatter};
-use std::ops::{Deref, DerefMut};
+use std::fmt::{Debug, Display, Formatter};
 use core::ptr::NonNull;
-use std::io::{BufRead, empty};
 use crate::errors::Errors;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq, Default)]
@@ -40,7 +38,7 @@ impl BidirList {
     }
 
     pub fn push_front(&mut self, new: u32) {
-        let mut new_node:Box<Node> = Box::new(Node::new(new));
+        let new_node:Box<Node> = Box::new(Node::new(new));
         match self.empty() {
             true => {
                 self.add_first(new_node);
@@ -53,11 +51,24 @@ impl BidirList {
         self.len = self.len + 1;
     }
 
-    pub fn pop_front(&mut self) -> Result<(), Errors> {
+    pub fn pop_front(&mut self) -> Result<u32, Errors> {
         if self.empty() {
             return Err(Errors::NoElementInListError);
         }
-        Ok(())
+
+        match self.head.map(|old_head| unsafe {
+            let node = Box::from_raw(old_head.as_ptr());
+            self.head = node.next;
+            match self.head {
+                Some(head) => (*head.as_ptr()).prev = None,
+                None => self.head = None,
+            }
+            self.len = self.len - 1;
+            node.data
+        }) {
+            None => return Err(Errors::NoElementInListError),
+            Some(s) => Ok(s),
+        }
     }
 
     pub fn empty(&self) -> bool {
@@ -67,12 +78,14 @@ impl BidirList {
 
 impl BidirList {
     fn push_front_node(&mut self, mut node: Box<Node>) {
-        node.next = self.tail;
-        let node = Some(Box::leak(node).into());
         unsafe {
-            (*self.tail.unwrap().as_ptr()).prev = node;
+            node.next = self.head;
+            let node = Some(Box::leak(node).into());
+            unsafe {
+                (*self.head.unwrap().as_ptr()).prev = node;
+            }
+            self.head = node;
         }
-        self.tail = node;
     }
 
     fn add_first(&mut self, mut node: Box<Node>) {
@@ -82,27 +95,29 @@ impl BidirList {
     }
 
     fn drop_front(&mut self) {
-        let mut new_front: Option<NonNull<Node>> = None;
-        unsafe {
-            new_front = self.head.unwrap().as_ref().next;
-        }
-        std::mem::drop(self.head);
-        self.head = new_front;
+        self.head.map(|old_head| unsafe {
+            let node = Box::from_raw(old_head.as_ptr());
+            self.head = node.next;
+            match self.head {
+                Some(head) => (*head.as_ptr()).prev = None,
+                None => self.head = None,
+            }
+            self.len = self.len - 1;
+        });
     }
 }
 
 impl Display for BidirList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut node = self.tail;
+        let mut node = self.head;
         write!(f, "[head|front]");
         while let Some(s) = node {
             write!(f, "<=>");
             unsafe {
-                write!(f, "[{}]", s.as_ref().data);
+                write!(f, "{}", s.as_ref());
                 node = node.unwrap().as_ref().next;
             }
         }
-
         write!(f, "<=>[tail|back]")
     }
 }
@@ -115,13 +130,15 @@ impl Display for Node {
 
 impl Drop for Node {
     fn drop(&mut self) {
-        println!("Dropped {}", self.data);
+        println!("Dropped node {}", self);
     }
 }
 
 impl Drop for BidirList {
     fn drop(&mut self) {
-        println!("Dropped {}", self);
-        // todo: clear nodes
+        println!("Dropped List: {}", self);
+        while !self.empty() {
+            self.drop_front();
+        }
     }
 }

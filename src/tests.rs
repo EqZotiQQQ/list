@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use std::ptr::NonNull;
     use std::rc::Rc;
     use crate::bidirectional_list::{BidirList, Node};
 
@@ -33,8 +32,8 @@ mod tests {
 
     #[test]
     fn push_to_non_empty_list() {
-        let tail = Some(Rc::new(Node::new(24)));
-        let head = Some(Rc::new(Node::new(42)));
+        let tail = Some(Rc::new(Node::new(42)));
+        let head = Some(Rc::new(Node::new(24)));
 
         let mut list = BidirList::new();
         list.push_front(42);
