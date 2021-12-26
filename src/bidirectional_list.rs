@@ -11,7 +11,7 @@ pub struct BidirList<T>
 where T: Display + Copy {
     pub head: Option<NonNull<Node<T>>>,
     pub tail: Option<NonNull<Node<T>>>,
-    pub len: u8,
+    pub len: usize,
 }
 
 impl<T> BidirList<T>
